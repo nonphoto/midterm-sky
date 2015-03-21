@@ -1,0 +1,49 @@
+//-*- C++ -*-
+Vec3<T> Atmosphere<T>::computeIncidentLight(Ray<T> &r) const
+{
+    T t0, t1;
+    if (!intersect<T>(r, radiusAtmosphere, t0, t1) || t1 < 0) return Vec3<T>(0);
+    if (t0 > r.tmin && t0 > 0) r.tmin = t0;
+    if (t1 < r.tmax) r.tmax = t1;
+    unsigned numSamples = 16;
+    unsigned numSamplesLight = 8;
+    T segmentLength = (r.tmax - r.tmin) / numSamples;
+    T tCurrent = r.tmin;
+    Vec3<T> sumR(0), sumM(0);
+    T opticalDepthR = 0, opticalDepthM = 0;
+    T mu = r.direction.dot(sunDirection);
+    T phaseR = 3 / (16 * M_PI) * (1 + mu * mu);
+    T g = 0.76;
+    T phaseM = 3 / (8 * M_PI) * ((1 - g * g) * (1 + mu * mu))/((2 + g * g) * pow(1 + g * g - 2 * g * mu, 1.5));
+    for (unsigned i = 0; i < numSamples; ++i) {
+        Vec3<T> samplePosition = r(tCurrent + T(0.5) * segmentLength);
+        T height = samplePosition.magnitude() - radiusEarth;
+        // compute optical depth for light
+        T hr = exp(-height / Hr) * segmentLength;
+        T hm = exp(-height / Hm) * segmentLength;
+        opticalDepthR += hr;
+        opticalDepthM += hm;
+        // light optical depth
+        Ray<T> lightRay(samplePosition, sunDirection);
+        intersect(lightRay, radiusAtmosphere, lightRay.tmin, lightRay.tmax);
+        T segmentLengthLight = lightRay.tmax / numSamplesLight, tCurrentLight = 0;
+        T opticalDepthLightR = 0, opticalDepthLightM = 0;
+        unsigned j = 0;
+        for (j = 0; j < numSamplesLight; ++j) {
+            Vec3<T> samplePositionLight = lightRay(tCurrentLight + T(0.5) * segmentLengthLight);
+            T heightLight = samplePositionLight.magnitude() - radiusEarth;
+            if (heightLight < 0) break;
+            opticalDepthLightR += exp(-heightLight / Hr) * segmentLengthLight;
+            opticalDepthLightM += exp(-heightLight / Hm) * segmentLengthLight;
+            tCurrentLight += segmentLengthLight;
+        }
+        if (j == numSamplesLight) {
+            Vec3<T> tau = betaR * (opticalDepthR + opticalDepthLightR) + betaM * 1.1 * (opticalDepthM + opticalDepthLightM);
+            Vec3<T> attenuation(exp(-tau.x), exp(-tau.y), exp(-tau.z));
+            sumR +=  hr * attenuation;
+            sumM +=  hm * attenuation;
+        }
+        tCurrent += segmentLength;
+    }
+    return 20 * (sumR * phaseR * betaR + sumM * phaseM * betaM);
+}

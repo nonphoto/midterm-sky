@@ -1,0 +1,348 @@
+Application Log
+Start: Wed Oct 22 21:15:01 2014
+
+Initializing System::findDataFile took 0.000956s
+
+Entering GApp::GApp()
+cwd = /Volumes/scratch/jonas/midterm-sky/data-files
+System::setAppDataDir("/Volumes/scratch/jonas/midterm-sky/build/")
+Initializing System::findDataFile took 0.000797s
+Setting video mode
+Setting initial rendering state.
+Done setting initial state.
+104 ImageFormats:
+              Format  Readable    Writeable
+                  L8  No          No 
+                 L16  No          No 
+                L16F  No          No 
+                L32F  No          No 
+                  A8  No          No 
+                 A16  No          No 
+                A16F  No          No 
+                A32F  No          No 
+                 LA4  No          No 
+                 LA8  No          No 
+                LA16  No          No 
+               LA16F  No          No 
+               LA32F  No          No 
+                RGB5  Yes         No 
+              RGB5A1  Yes         No 
+                RGB8  Yes         No 
+               RGB10  Yes         No 
+             RGB10A2  Yes         No 
+               RGB16  Yes         No 
+              RGB16F  Yes         No 
+              RGB32F  Yes         No 
+          R11G11B10F  Yes         No 
+             RGB9E5F  Yes         No 
+               RGB8I  Yes         No 
+              RGB8UI  Yes         No 
+              RGBA8I  Yes         No 
+             RGBA8UI  Yes         No 
+          RGB8_SNORM  Yes         No 
+         RGBA8_SNORM  Yes         No 
+         RGB16_SNORM  Yes         No 
+        RGBA16_SNORM  Yes         No 
+                BGR8  Yes         No 
+               BGRA8  Yes         No 
+                  R8  Yes         No 
+                 R8I  Yes         No 
+                R8UI  Yes         No 
+            R8_SNORM  Yes         No 
+                 R16  Yes         No 
+                R16I  Yes         No 
+               R16UI  Yes         No 
+           R16_SNORM  Yes         No 
+                R16F  Yes         No 
+                R32I  Yes         No 
+               R32UI  Yes         No 
+                 RG8  Yes         No 
+                RG8I  Yes         No 
+               RG8UI  Yes         No 
+           RG8_SNORM  Yes         No 
+                RG16  Yes         No 
+               RG16I  Yes         No 
+              RG16UI  Yes         No 
+          RG16_SNORM  Yes         No 
+               RG16F  Yes         No 
+               RG32I  Yes         No 
+              RG32UI  Yes         No 
+                R32F  Yes         No 
+               RG32F  Yes         No 
+               RGBA8  Yes         No 
+              RGBA16  Yes         No 
+             RGBA16F  Yes         No 
+             RGBA32F  Yes         No 
+             RGBA16I  Yes         No 
+            RGBA16UI  Yes         No 
+              RGB32I  Yes         No 
+             RGB32UI  Yes         No 
+             RGBA32I  Yes         No 
+            RGBA32UI  Yes         No 
+               RGBA4  Yes         No 
+               RGBA2  Yes         No 
+       YUV420_PLANAR  No          No 
+              YUV422  No          No 
+              YUV444  No          No 
+            RGB_DXT1  Yes         No 
+           RGBA_DXT1  Yes         No 
+           RGBA_DXT3  Yes         No 
+           RGBA_DXT5  Yes         No 
+               SRGB8  Yes         No 
+              SRGBA8  Yes         No 
+                 SL8  No          No 
+                SLA8  No          No 
+           SRGB_DXT1  Yes         No 
+          SRGBA_DXT1  Yes         No 
+          SRGBA_DXT3  Yes         No 
+          SRGBA_DXT5  Yes         No 
+             DEPTH16  Yes         No 
+             DEPTH24  Yes         No 
+             DEPTH32  Yes         No 
+            DEPTH32F  Yes         No 
+            STENCIL1  No          No 
+            STENCIL4  No          No 
+            STENCIL8  No          No 
+           STENCIL16  No          No 
+    DEPTH24_STENCIL8  Yes         No 
+
+Capability    Minimum   Desired   Received  Ok?
+-------------------------------------------------
+* RENDER DEVICE 
+Depth         16 bits   24 bits   24 bits   ok
+Stencil        8 bits    8 bits    8 bits   ok
+Alpha                              8 bits   ok
+Red                                8 bits   ok
+Green                              8 bits   ok
+Blue                               8 bits   ok
+FSAA                       1     1    ok
+Width                  800 pixels           ok
+Height                 600 pixels           ok
+Mode                 Fullscreen             ok
+
+This driver will NOT support G3D 9.00:
+GLSL version 3.30                   yes - GLSL version on this driver is 4.10
+GPU Supports OpenGL 3.3 or later    yes - OpenGL version on this driver is 4.1
+         GL_ARB_seamless_cube_map   NO - Required for G3D 9.0!
+            GL_ARB_sample_shading   yes - Optional
+
+
+Done initializing RenderDevice.
+NetworkDevice: Ignored adapter bridge0 because ip = 0
+NetworkDevice: Ignored adapter en4 because ip = 0
+NetworkDevice: Ignored adapter p2p0 because ip = 0
+NetworkDevice: Ignored adapter en5 because ip = 0
+System = { 
+    App { 
+        Name = "/Volumes/scratch/jonas/midterm-sky/build/midterm-skyd"
+        cwd = "/Volumes/scratch/jonas/midterm-sky/data-files"
+    } 
+    
+    OS { 
+        Name = "OS X 10.9.5"
+    } 
+    
+    CPU { 
+        Vendor = "Intel"
+        Architecture = "Intel 80486"
+        hasCPUID = Yes 
+        hasMMX = No 
+        hasSSE = No 
+        hasSSE2 = No 
+        hasSSE3 = No 
+        has3DNow = No 
+        hasRDTSC = No 
+        numCores = 8 
+    } 
+    
+    G3D { 
+        Link version = 100002 
+        Compile version = "G3D Innovation Engine 10.00 beta 2, 64-bit (Debug)"
+        G3D10DATA = "/Users/morgan/Projects/g3d/G3D10/data-files:/Users/morgan/Projects/mcguire-assets"
+    } 
+    
+    GPU = { 
+        Chipset = "NVIDIA GeForce GT 650M OpenGL Engine;"
+        Vendor = "NVIDIA Corporation;"
+        Driver = "Unknown;"
+        OpenGL version = "4.1 NVIDIA-8.26.28 310.40.55b01;"
+        Textures = 16 ;
+        Texture coordinates = 1504856536 ;
+        Texture units = 1504856536 ;
+        GL_MAX_TEXTURE_SIZE = 16384 ;
+        GL_MAX_CUBE_MAP_TEXTURE_SIZE = 16384 ;
+        GL_MAX_COLOR_ATTACHMENTS = 8 ;
+    } ; 
+    
+    Window = { 
+        API = "GLFW;"
+        Version = "3.1.0 Cocoa NSGL chdir menubar;"
+        
+        In focus = true; 
+        Centered = true; 
+        Framed = false; 
+        Visible = true; 
+        Resizable = false; 
+        Full screen = true; 
+        Top = 0 ;
+        Left = 0 ;
+        Width = 800 ;
+        Height = 600 ;
+        Refresh rate = 85 ;
+        
+        Alpha bits = 0 ;
+        Red bits = 8 ;
+        Green bits = 8 ;
+        Blue bits = 8 ;
+        Depth bits = 24 ;
+        Stencil bits = 8 ;
+        Asynchronous = true; 
+        Stereo = false; 
+        FSAA samples = 1 ;
+        GL extensions = [ GL_ARB_sample_shading,
+             GL_ARB_sampler_objects,
+             GL_ARB_transform_feedback2,
+             GL_APPLE_row_bytes,
+             GL_ARB_gpu_shader5,
+             GL_EXT_texture_sRGB_decode,
+             GL_EXT_texture_compression_s3tc,
+             GL_APPLE_flush_render,
+             GL_ARB_shader_bit_encoding,
+             GL_ARB_gpu_shader_fp64,
+             GL_ARB_texture_buffer_object_rgb32,
+             GL_ARB_occlusion_query2,
+             GL_ARB_vertex_type_2_10_10_10_rev,
+             GL_ARB_ES2_compatibility,
+             GL_EXT_framebuffer_multisample_blit_scaled,
+             GL_EXT_debug_label,
+             GL_ARB_separate_shader_objects,
+             GL_ARB_transform_feedback3,
+             GL_APPLE_container_object_shareable,
+             GL_ARB_texture_gather,
+             GL_EXT_texture_filter_anisotropic,
+             GL_ARB_timer_query,
+             GL_ARB_vertex_attrib_64bit,
+             GL_ARB_texture_storage,
+             GL_ARB_texture_rgb10_a2ui,
+             GL_ARB_instanced_arrays,
+             GL_ARB_internalformat_query,
+             GL_ARB_draw_buffers_blend,
+             GL_APPLE_client_storage,
+             GL_EXT_debug_marker,
+             GL_ARB_explicit_attrib_location,
+             GL_ARB_blend_func_extended,
+             GL_EXT_depth_bounds_test,
+             GL_NV_texture_barrier,
+             GL_APPLE_rgb_422,
+             GL_ARB_draw_indirect,
+             GL_ATI_texture_mirror_once,
+             GL_ARB_shading_language_include,
+             GL_ARB_texture_swizzle,
+             GL_ARB_texture_cube_map_array,
+             GL_ARB_viewport_array,
+             GL_ARB_texture_query_lod,
+             GL_ARB_shader_subroutine,
+             GL_EXT_texture_mirror_clamp,
+             GL_ARB_tessellation_shader,
+             GL_APPLE_object_purgeable,
+             GL_APPLE_texture_range ]; 
+    }; 
+    
+    Network = { 
+        Adapter0 ={ 
+            hostname = ";"
+            name = "en0;"
+            ip = "137.165.  8.185"; 
+            subnet = "255.255.252.  0"; 
+            broadcast = "137.165. 11.255"; 
+            mac = "40:6c:8f:1c:45:d5"; 
+        }; 
+    }; 
+    
+    
+    }; 
+
+Entering GApp::loadFont("console-small.fnt")
+Found "console-small.fnt" at "/Users/morgan/Projects/g3d/G3D10/data-files/font/console-small.fnt"
+Done GApp::loadFont(...)
+Done GApp::GApp()
+
+Found scenes:
+  "Beta Squadron" (./beta.Scene.Any)
+  "G3D atcs" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/atcs.Scene.Any)
+  "G3D Cornell Box (Empty CO)" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/CornellBox-empty-cyan-orange.Scene.Any)
+  "G3D Cornell Box (Glossy)" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/CornellBox-glossy.Scene.Any)
+  "G3D Cornell Box (Mirror)" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/CornellBox-mirror.Scene.Any)
+  "G3D Cornell Box (Spheres)" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/CornellBox-spheres.Scene.Any)
+  "G3D Cornell Box (Water)" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/CornellBox-water.Scene.Any)
+  "G3D Cornell Box" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/CornellBox.Scene.Any)
+  "G3D Feature Test" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/featureTest.Scene.Any)
+  "G3D Heightfield" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/heightfield.Scene.Any)
+  "G3D Minecraft" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/minecraft.Scene.Any)
+  "G3D Motion" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/motion.Scene.Any)
+  "G3D Opening Door" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/openingDoor.Scene.Any)
+  "G3D Seymour" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/seymour.Scene.Any)
+  "G3D Sibenik" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/sibenik.Scene.Any)
+  "G3D Sponza" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/sponza.Scene.Any)
+  "G3D Sponza White" (/Users/morgan/Projects/g3d/G3D10/data-files/scene/sponzaWhite.Scene.Any)
+WARNING: Output of vertex shader 'g3d_TexCoord' not read by fragment shader
+
+
+
+_____________________________________________________
+
+    ###    Files Used    ###
+
+/usr/mac-cs-local/share/cs371/G3D/data/scene/seymour.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/gui/osx-10.7.gtm
+/usr/mac-cs-local/share/cs371/G3D/data/scene/CornellBox-spheres.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/cubemap/islands/islands_west.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/shader/compatibility.glsl
+iChannel3.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/scene/featureTest.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/material/oldgirder/oldgirder.UniversalMaterial.Any
+/usr/mac-cs-local/share/cs371/G3D/data/shader/Texture/Texture.glsl
+/usr/mac-cs-local/share/cs371/G3D/data/font/icon.fnt
+/usr/mac-cs-local/share/cs371/G3D/data/font/arial.fnt
+/usr/mac-cs-local/share/cs371/G3D/data/shader/Film/Film_FXAA_310.pix
+/usr/mac-cs-local/share/cs371/G3D/data/shader/Film/Film_toneMap.glsl
+/usr/mac-cs-local/share/cs371/G3D/data/scene/motion.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/shader/Film/Film_composite.pix
+/usr/mac-cs-local/share/cs371/G3D/data/model/viper/viper.ArticulatedModel.Any
+iChannel0.jpg
+/Volumes/scratch/jonas/midterm-sky/data-files/.
+/usr/mac-cs-local/share/cs371/G3D/data/material/metalcrate/metalcrate.UniversalMaterial.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/CornellBox-empty-cyan-orange.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/minecraft.Scene.Any
+noise.png
+/usr/mac-cs-local/share/cs371/G3D/data/shader/default.vrt
+/usr/mac-cs-local/share/cs371/G3D/data/cubemap/islands/islands_up.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/scene/CornellBox.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/icon/tango.icn
+/usr/mac-cs-local/share/cs371/G3D/data/material/rustymetal/rustymetal.UniversalMaterial.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/openingDoor.Scene.Any
+/Volumes/scratch/jonas/midterm-sky/data-files/sky.pix
+/usr/mac-cs-local/share/cs371/G3D/data/scene/CornellBox-water.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/shader/g3dmath.glsl
+iChannel1.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/cubemap/islands/islands_down.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/material/blackrubber/blackrubber.UniversalMaterial.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/CornellBox-glossy.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/atcs.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/font/console-small.fnt
+/usr/mac-cs-local/share/cs371/G3D/data/cubemap/islands/islands_east.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/scene/sponza.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/model/truckwheel/truckwheel.ArticulatedModel.Any
+/usr/mac-cs-local/share/cs371/G3D/data/material/sand/sand.UniversalMaterial.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/CornellBox-mirror.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/material/chrome/chrome.UniversalMaterial.Any
+/usr/mac-cs-local/share/cs371/G3D/data/cubemap/islands/islands_north.jpg
+iChannel2.jpg
+/usr/mac-cs-local/share/cs371/G3D/data/cubemap/islands/islands_south.jpg
+/Volumes/scratch/jonas/midterm-sky/data-files/./beta.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/heightfield.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/sponzaWhite.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/scene/sibenik.Scene.Any
+/usr/mac-cs-local/share/cs371/G3D/data/font/greek.fnt
+log.txt
+

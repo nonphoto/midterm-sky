@@ -1,0 +1,124 @@
+/** \file mainpage.dox \mainpage
+\section Report
+<b>Project</b>: Sky
+<br><b>Team</b>: Benji Jones (bsj1@williams.edu), and Jonas Luebbers (jkl1@williams.edu)
+<br><b>Date</b>: October 21, 2014
+
+
+
+\subsection Goals Goals
+Our goal was to create a shader that combines atmospheric scattering and clouds. We wanted it to render fast enough to interact with in real-time and be procedural, with no modeling or scene definition.<br>
+
+Read our development specification for more details.
+
+\subsection Overview Overview
+
+The sunset shader works by simulating the scattering of light particles in the atmosphere.
+Clouds are made by simulating how light scatters in a density field.
+
+<b>Atmospheric Scattering</b><br>
+Let's start with a simple model. Simply stated, the sun emits light and some of it goes into your eyes. If this were all there is to it, then all we would see when we walk outside would be a perfect circle of light in a pitch black sky. However, we know that the Earth's atmosphere is composed of billions of tiny particles, and all of these particles scatter light to varying degrees. This is how we can see the sky; light from the sun enters the atmosphere and hits some point in the volume of the atmosphere that scatters it toward your eye. Additionally, this means that light coming directly from the sun is attenuated and appears less intense.<br>
+
+To simulate this, we wrote the following two functions, and assume that the atmosphere is of uniform density: <br>
+
+<ol>
+<li>`directLight(vec3 P, vec3 w)` calculates the color of light at `P` coming directly from `w` using a fixed step ray-marching algorithm. Light is attenuated each step by an amount that depends on the constant scattering coefficients. This is used later to calculate the color of the clouds.</li>
+
+<li>`scatteredLight(vec3 P, vec3 w)` calculates the total light at `P` that was scattered from direction `w` using a fixed step ray-marching algorithm. Each step along the ray simulates a point at which direct light is scattered toward `P`. To this end, we do a secondary ray-march at each step in the direction of the sun that calculates the amount of direct light at that sample position (in a similar way as `directLight()`, which is then used to calculate the amount of light that is scattered at each sample position.</li>
+</ol>
+
+This is still a slightly simplified model, because different sizes of particles scatter light in different ways. The angular distribution of scattered light is governed by the phase function, which we use to calculate the amount of scattered light. For our purposes there are really two kinds of scattering, and two phase functions:
+
+<ol>
+<li> Large particles like dust and aerosols scatter all wavelengths of light almost equally. This creates an effect known as Mie scattering (Results fig. 1). Mie scattering is generally what makes the sun and distant objects appear hazy and indistinct.</li>
+
+<li> Small particles (particles with a diameter on the order of the wavelength of the light itself) scatter shorter wavelengths more easily. This is called Rayleigh scattering (Results fig. 2), which is responsible for the sky's blue color at midday. At sunrise and sundown, light from the sun must travel through more atmosphere to get to the camera, which is why it appears red.</li>
+</ol>
+
+We add these two types of scattering functions together in `directLight()` and `scatteredLight()`. Even though light can scatter more than once, this is enough to produce a reasonable graphical approximation of the atmosphere because multiple scattering doesn't significantly improve the visual quality of the rendered image.
+
+<b>Clouds</b><br>
+Like the atmosphere, clouds are a semi-transparent volume. Unlike the atmosphere, however, we can't assume that clouds have uniform density (in fact they almost never do). We didn't want to do any modeling, so we used a noise function to generate an infinite field of clouds. The noise function (which can run in a full procedural mode in addition to the faster lookup table mode) is borrowed from Inigo Quilez's "Clouds" shader.<br>
+
+The `map(vec3 X)` function returns a density float value for any point 'X'. This function mixes noise samples at different scales to produce a more complex, cloud-like density distribution. Because the density distribution interpolates smoothly between high and low values, this creates clouds that are most dense in the center and less dense toward the edges.<br>
+
+We render the clouds with a ray-marching algorithm that accumulates the color of the cloud at each point scaled by the color's alpha channel, which is calculated using `map()`. If we linearly interpolate the cloud color by it's density value from black to white, we get unlit clouds (Results fig. 4).<br>
+
+To render clouds with accurate lighting, we need to calculate the color at each step in the ray-march with shadows in mind. This is tricky because clouds cast shadows on themselves, which means that the amount that any given point the cloud is in shadow depends on the collective density along a continuous line from the point to the location of the light source. A secondary ray-march would be prohibitively costly, so we approximate the shadow by choosing a single point a fixed step along the line and using `map()` to calculate the density there. We use this secondary density value to interpolate between the direct and ambient light colors for the clouds, where a low density value produces more direct light color, and a high density value produces more ambient light color. The direct light color is calculated by calling `directLight()' in the direction of the sun. The ambient light color is approximated by calling `scatteredLight()` for some vertical direction, which approximates the average color of the sky.<br>
+
+All of these factors combine to create a believable render of the sky and clouds (Results fig. 0), but there is still more to do. Here are some possible improvements for the future:
+
+<ol>
+<li> A night cycle and moon. Currently, we only render the sun and night is pitch black.</li>
+<li> Performance improvements. Our shader runs in realtime, but begins to struggle at resolutions higher than 720x480.</li>
+<li> Crepuscular rays, aerial perspective and terrain. It should be possible to incorporate terrain into our shader, which could itself introduce some interesting atmospheric lighting effects. </li>
+</ol> 
+
+\subsection results Results
+
+\thumbnail{shadows.png, Figure 0 - The final product}<br>
+\thumbnail{mie.png, Figure 1 - Mie scattering}<br>
+\thumbnail{rayleigh.png, Figure 2 - Rayleigh scattering}<br>
+\thumbnail{both.png, Figure 3 - Mie and Rayleigh combined}<br>
+\thumbnail{no-shadows.png, Figure 4 - Clouds without shadows}<br>
+
+\thumbnail{sky-film.mp4, The short film}
+
+\subsection references References
+
+"Clouds" shader by Inigo Quilez (iq)<br>
+"TekF Clouds" shader by Ben Weston (TekF)<br>
+"Sunsets" shader by Even Entam (ThiSpawn)<br>
+"GPU Gems 16:Accurate Atmospheric Scattering" by Sean O'Neil<br>
+"Atmospheric Scattering" on scratchapixel.com<br>
+
+\subsection specification Specification
+
+<ol>
+<li>Combine the following shaders to create a realistic procedural sky shader:
+  <ul>
+    <li>"Clouds" by iq: https://www.shadertoy.com/view/XslGRr</li>
+    <li>Alternatively, "Clouds" by TekF: https://www.shadertoy.com/view/lssGRX</li>
+    <li>"Sunsets" by ThiSpawn: https://www.shadertoy.com/view/lss3DS</li>
+  </ul>
+</li>
+
+<li>Combine atmospheric scattering and clouds into a single shader. the shader should run at at least 20 fps on one of the iMacs in TCL 217. No modeling should be required, though a model may be included in the final product to make it more interesting. As a stretch goal, include a landscape to make a more interesting scene for the film.</li>
+
+<li>Use the shader to create a short film (10 - 20 s, 720p) that demonstrates the shader in action:</li>
+
+<li>Decipher the algorithms used in the shaders given and rewrite them in easy to understand code:
+  <ul>
+    <li>Decipher is defined as "learn the techniques used to create the shader and be able to articulate them in the presentation."</li>
+    <li>Function names and variable names should be descriptive of their purpose.</li>
+    <li>The code should follow a clear structure; each function has a specific and clear purpose.</li>
+    <li>Unreadable code and "magic numbers" should be kept to a minimum, and any that remain should be explained in comments.</li>
+  </ul>
+</li>
+
+<li>Explain the code in a 2 page report and presentation that includes:
+  <ul>
+    <li>Screenshots of the final product at both day and night</li>
+    <li>Screenshots of the rewritten atmospheric scattering shader alone...
+      <ul>
+        <li>With Mie scattering.</li>
+        <li>With Rayleigh scattering.</li>
+        <li>With both Mie and Rayleigh scattering.</li>
+      </ul>
+    </li>
+
+    <li>Screenshots of the rewritten clouds shader alone...
+      <ul>
+        <li>With shadows.</li>
+        <li>Without shadows.</li>
+      </ul>
+    </li>
+
+    <li>Explanations of the physical processes behind the simulation, including mathematical functions where they are relevant and within the scope of the presentation.</li>
+    <li>The film of the final product.</li>
+  </ul>
+</li>
+</ol>
+See also \link Journal Development Journal \endlink.  
+
+*/

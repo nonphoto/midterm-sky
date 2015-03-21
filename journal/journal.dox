@@ -1,0 +1,184 @@
+// -*- html -*-
+/** \file journal.dox
+\page Journal Development Journal
+
+\tableofcontents
+
+<i>Newest entries are at the top</i>
+
+\section S20141021 2014-10-21: Tuesday
+
+\thumbnail{2014-10-21_002_midterm-sky_r3409_g3d_r5430__Full_Day_cycle_with_better_clouds.mp4, Full Day cycle with better clouds}
+
+
+
+
+
+\thumbnail{2014-10-21_000_midterm-sky_r3409_g3d_r5430__Full_day.mp4, Full day}
+
+
+
+\section S20141020 2014-10-20: Monday
+
+We fixed the clouds being white even at night by returning black in the function that calculates the clouds direct lighting color (directLight()) when the ray intersects with the horizon. It took us a while to figure out what was going on because we had a separate function called opticalDepths() that calculated some values that were useful for both direct and scattered light computations, but we ended up duplicating that code and rewriting it slightly differently to account for the changes in desired return values between the two.
+
+\thumbnail{2014-10-20_001_midterm-sky_r3299_g3d_r5430__Full_day_cycle.mp4, Full day cycle}
+
+Here's a video of the full cycle from one day to the next. Nighttime doesn't quite work yet, and we have yet to optimize for higher resolutions. I added a quick dithering post-process to get rid of color banding on monitors with fewer colors (like the projector in class). -Jonas
+
+
+
+\thumbnail{2014-10-20_000_midterm-sky_r3280_g3d_r5430__Dynamic_cloud_colors.jpg, Dynamic cloud colors}
+
+I made the color of the clouds respond to the color of light from the sun. After all the work we did yesterday to get the directLight function abstracted out of the main skyColor function, all I needed to do was make a secondary call to directLight (the light that hasn't been scattered away by the time it reaches a point) and use that as the bright part of the clouds. The ambient light simply gets the scatteredLight color of the sky from straight up for now. I also changed the cloud map function to return a float for density instead of a vec3 for color to make it easier to interpolate between the light and dark colors in the clouds. -Jonas
+
+\section S20141019 2014-10-19: Sunday
+
+Update cloud shadows to use the new sun direction variable.  Now calculates shadows quickly and correctly.
+
+Total rewrite of the scattering code.  Before this, the whole algorithm was a single monolithic function, and we wanted to abstract out the parts of it that were calculating direct sunlight, so we could reuse that code for the clouds.  It also greatly improved the readibility of the code, and in the process, we also learned a lot more about how the code works.  In doing this, we were able to properly meld together the two shaders in a readable and coherent manner.  Note the fancy new functions: distanceToSpace, opticalDepths, scatteredLight, and directLight.  With their powers combined, we can model Mie and Rayleigh scattering correctly and readably.  Note that previously, the atmospheric scattering code actually generalized to any planet/sun pair, with their relative distances, sizes, and positions all customizable.  We removed the explicit modeling of two planets in space and instead chose to simplify by allowing only a sun direction.  We did this because we had no use for the more complex solar system modeling and it greatly complicated the code.  We remain impressed, however, with the original work, and we hope that the curious reader tests the original sunset shader on ShaderToy.com by experienciencing a sunset from pluto.
+
+\thumbnail{2014-10-19_001_midterm-sky_r3252_g3d_r5430__Refactored_and_rewrote_scattering_code.jpg, Refactored and rewrote scattering code}
+
+Side note for fun:  To see a cool "halo" effect, use a non-normalized vector for the sun direction.
+
+\section S20141018 2014-10-18: Saturday
+
+I was correct in thinking that the noise function breaks at large values. I made it calculate the noise function and the skylight from different points and now it looks fine.
+
+\thumbnail{2014-10-18_000_midterm-sky_r3149_g3d_r5430__First_attempt.jpg, First attempt}
+
+I made a first pass at combining clouds and sunsets into sky.pix. Something wacky happened with the clouds, though the sunsets seem to be working fine. It might be that the noise function stops working at very large values like y value at the earth's surface. -Jonas
+
+\section S20141017 2014-10-17: Friday
+
+\thumbnail{2014-10-17_002_midterm-sky_r3083_g3d_r5430__Debug_demo.mp4, Debug demo}
+
+I added speed controls to the debug menu, and a frame counter to the shaders. This allows us to animate the shaders and control the speed. -Jonas
+
+
+The atmospheric scattering shader (sunsets.pix) is working. We were stuck for a while until we figured out that we were staring at the center of the planet.  Once we moved the camera to a better location, we were able to see the results of what we were rendering.  Right now, the sun is overpoweringly bright- we plan to get rid of some of the post-processing effects enabled right now so that we can begin to adjust the parameters and create a better image.
+
+\thumbnail{2014-10-17_001_midterm-sky_r3081_g3d_r5430__Sun_closer_to_the_horizon.jpg, Sun closer to the horizon}
+
+\thumbnail{2014-10-17_000_midterm-sky_r3081_g3d_r5430__The_sunset_shader_at_work.jpg, The sunset shader at work}
+
+Plans for future:
++ fix camera settings (bloom, etc.)
++ combine shaders
++ add static object (spire? implicitly traced cone?)
++ time-lapse effect with clouds moving slowly
++ create film
+
+\section S20141016 2014-10-16: Thursday
+
+Started working on the atmospheric scattering shader. nothing to show yet, but we have a better understanding of how it works. Jonas added more GUI options to turn different types of noise on or off.
+
+\section S20141015 2014-10-15: Wednesday
+
+I added a bit of GUI to turn shadows on and off. Not much yet but it should be easy to add buttons now that I figured it out. Updates in realtime. -Jonas
+
+\section S20141014 2014-10-14: Tuesday
+
+I fixed the artifacts by downloading the exact texture used by the shadertoy shader and using that. It seems that the texture is generated to be perfect for the specific noise function being used. There are still a few weird lines here and there, which I think might be because of image compression. -Jonas
+
+\thumbnail{2014-10-14_000_midterm-sky_r2873_g3d_r5416__Radial_artifacts.jpg, Radial artifacts}
+
+I set up the lookup table (LUT) noise function to make the clouds faster. It uses a 256x256 2D texture of pregenerated random noise to construct a more complicated noise function with some wacky math. I don't quite understand the math behind either noise function yet, but it isn't integral to how the rendering works, so I'm going to leave deciphering it until I have extra time. Right now though, it produces this weird radial artifacting effect. -Jonas
+
+\section S20141013 2014-10-13: Monday
+
+\thumbnail{2014-10-13_001_midterm-sky_r2814_g3d_r5416__Better_noise.jpg, Better noise}
+
+I fixed the noise function so that it looks more cloud like. This is done by adding different samples of 4D noise together at different levels of detail. The darkness on the interior of the clouds comes from the noise function itself, which returns densities that smoothly interpolate between high and low values. -Jonas
+
+
+
+\thumbnail{2014-10-13_000_midterm-sky_r2814_g3d_r5416__Directional_shadows.jpg, Directional shadows}
+
+Clouds now have more directional shadows. I discovered that a constant that I was using when calculating the shadows was far too low, causing them to have very little effect. Now to get a more complex noise function
+
+\section S20141012 2014-10-12: Sunday
+
+\thumbnail{2014-10-12_001_midterm-sky_r2782_g3d_r5416__Shadows_.jpg, Shadows!}
+
+I implemented shadows in about 5 minutes. All it takes is a raymarch toward the sun to see how deep a particular point is within the cloud. I've been having trouble making this directional, however. Right now it the direction of the light doesn't seem to have any effect. It's a little laggy as well, but I think playing with the constants a bit should help. -Jonas
+
+
+\thumbnail{2014-10-12_000_midterm-sky_r2782_g3d_r5416__Clouds_.jpg, Clouds!}
+
+I wrote the map() function today, which gives us fully procedural clouds with no shadows. I am also using a simplified noise function here that creates simplified shapes. Adding the noise function on itself will make it more complicated. Both cloud shaders use a bit of a hack for shadows where the color of the cloud is darker the farther it is from clear sky. The TekF clouds actually do a raytrace toward the sun which makes them a bit more realistic. -Jonas
+
+\section S20141011 2014-10-11: Saturday
+
+Rewrote the hash(), noise(), and traceRay() functions in clouds.pix. traceRay() was straightforward, but I'm still not sure what's going on in hash() or noise() other than that they are used to create the implicit shape for the clouds. I might just leave them for now, as they aren't important to understanding how the algorithm works. -Jonas
+
+\thumbnail{2014-10-11_000_midterm-sky_r2708_g3d_r5407__Clouds_background.jpg, Clouds background}
+
+I rewrote the main method of the clouds shader. Most of it is setting up the camera, which is already done for us by G3D, but it also calculates the skybox colors. It simply adds sun and sky colors depending on the direction, and then linearly interpolates them with the raytraced clouds using the alpha channel. Right now the raytrace returns the zero vector, but that's the next step. -Jonas
+
+\section notes Formatting Notes
+Put the newest entry at the top of this file, like a blog. 
+Begin the title of each section with a date in ISO format (YYYY-MM-DD).
+Press F4 and F6 to embed screenshots and video in this journal.
+
+Doxygen supports [markdown syntax](http://www.stack.nl/~dimitri/doxygen/manual/markdown.html),
+[many HTML commands](http://www.stack.nl/~dimitri/doxygen/manual/htmlcmds.html),
+and LaTeX-like [Doxygen commands](http://www.stack.nl/~dimitri/doxygen/manual/commands.html)
+for formatting in this file. The most frequently used of these are:
+
+\verbatim
+[Link syntax](http://g3d.sf.net)
+
+Table    | Syntax
+-------: | ---------
+  100 ms |  Hello
+  5 ms   |  World
+
+- List
+- Syntax
+  + Subbullet
+
+~~~~~~~~~~~~~
+// Code syntax in C++
+for (int i = 0; i < 10; ++i) {
+   printf("%d\n", i);
+}
+~~~~~~~~~~~~~
+\endverbatim
+
+which produce:
+
+[Link syntax](http://g3d.sf.net)
+
+Table  | Syntax
+-----: | ---------
+  1 ms |  Hello
+500 ms |  World
+
+- List
+- Syntax
+  + Subbullet
+
+~~~~~~~~~~~~~
+// Code syntax in C++
+for (int i = 0; i < 10; ++i) {
+   printf("%d\n", i);
+}
+~~~~~~~~~~~~~
+
+You can manually embed images in this file using the custom G3D Doxygen commands:
+
+\verbatim
+\thumbnail{imagefilename}
+\thumbnail{imagefilename, caption}
+\video{videofilename, caption}
+\endverbatim
+
+The `imagefilename` does not need to include a path.  Put the images
+in the `journal/` or `doc-files/` directories.  They will
+automatically be copied to the `build/doc` directory when you run Doxygen.
+
+If you have Latex installed, then you can display inline (\f$ \int_{-\infty}^{\infty} e^{-x^2} dx \f$) and display math equations, for example: \f[ \int_{-\infty}^{\infty} e^{-x^2} dx \f]
+
+*/

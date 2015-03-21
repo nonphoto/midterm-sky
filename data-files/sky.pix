@@ -1,0 +1,326 @@
+// -*- c++ -*-
+// Procedural skies by Jonas Luebbers and Benji Jones, 2014
+// Original "Clouds" shader by Inigo Quilez (iq): https://www.shadertoy.com/view/XslGRr#
+// Original "Sunsets" shader by Evan Entam (ThiSpawn): https://www.shadertoy.com/view/lss3DS
+
+#version 330
+#include <g3dmath.glsl>
+#include <Texture/Texture.glsl>
+
+// Input arguments from the C++ program
+uniform mat4x3 cameraToWorldMatrix;
+
+uniform_Texture(samplerCube, environmentMap_);
+
+uniform float tanHalfFieldOfViewY;
+uniform float projectionMatrix22, projectionMatrix23;
+
+uniform sampler2D iChannel0;
+
+uniform float frame;
+uniform bool cloudsEnabled;
+uniform float cloudSpeed;
+uniform float sunSpeed;
+uniform float rayleighScale;
+uniform float mieScale;
+uniform float cloudAmplitude;
+uniform bool cloudsEnabled;
+uniform bool shadowsEnabled;
+uniform bool rayleighEnabled;
+uniform bool mieEnabled;
+uniform bool complexNoise;
+uniform bool proceduralNoise;
+
+// Output to the App::m_framebuffer
+out Color3 pixelColor;
+
+//////////////////////////////////////////////////////////////
+
+const float PI = 3.14159265358979323846;
+const float PI_2 = 1.57079632679489661923;
+const float PI_4 = 0.785398163397448309616; 
+
+const int SKYLIGHT_VIEWDIR_SAMPLES = 12;
+const int SKYLIGHT_SUNDIR_SAMPLES = 6;
+
+struct planet_t
+{
+    float r_s; // sea level radius
+    float r_a; // atmosphere radius
+};
+
+planet_t earth = planet_t(6360.0e3, 6420.0e3);
+
+struct sun_t
+{  
+    vec3 beta_r;
+    vec3 beta_m;
+    float scaleHeight_r;
+    float scaleHeight_m;
+    float intensity;
+    float meanCosine;
+    vec3 direction;
+    float angularDiameter; // between 0.5244 and 5.422 for our sun
+    vec3 color;
+};
+
+sun_t sun = sun_t(vec3(5.5e-6, 13.0e-6, 22.1e-6) * rayleighScale,
+                  vec3(21.0e-6) * mieScale,
+                  7994.0,
+                  1200.0,
+                  10.0,
+                  0.76,
+                  normalize(vec3(cos(2 * PI * sunSpeed * frame / 24), sin(2 * PI * sunSpeed * frame / 24), 1.0)),
+                  0.53,
+                  vec3(1.0, 1.0, 1.0));
+
+float distanceToSpace(in vec3 rayOrigin, in vec3 rayDirection) {
+    float r = length(rayOrigin); // distance from center of earth to ray origin
+    vec3 up = rayOrigin / r; // normalize rayOrigin
+    float beta = PI - acos(dot(rayDirection, up)); 
+    float sb = sin(beta);
+    float b = earth.r_a;
+    float bt = earth.r_s - 10.0;
+    
+    float tr = sqrt((b * b) - (r * r) * (sb * sb)) + r * cos(beta);
+    
+    return tr;
+}
+
+float sunVisibility(float altitude) {
+    float result = 0.0;
+    float verticalVisibility = clamp((0.5 + altitude / sun.angularDiameter), 0.0, 1.0); 
+    
+    if (verticalVisibility == 0.0 || verticalVisibility == 1.0) {
+        return verticalVisibility;
+    }
+    
+    if (verticalVisibility > 0.5) {
+        float h = (verticalVisibility - 0.5) * 2.0;
+        float a = ((acos(h) * 2.0) - sin(acos(h) * 2.0)) / (2.0 * PI);
+        return 1.0 - a;
+        
+    } else {
+        float h = (0.5 - verticalVisibility) * 2.0;
+        float a = ((acos(h) * 2.0) - sin(acos(h) * 2.0)) / (2.0 * PI);
+        return a;
+    }
+}
+
+Radiance3 directLight(vec3 P, vec3 w) {
+    float d = distanceToSpace(P, w);
+    if (d == inf) {
+        return vec3(0.0);
+    }
+    float segmentLength = d / float(SKYLIGHT_SUNDIR_SAMPLES);
+    float t = 0.0;
+    float opticalDepth_r = 0.0;
+    float opticalDepth_m = 0.0;
+
+    for (int j = 0; j < SKYLIGHT_SUNDIR_SAMPLES; ++j) {
+        vec3 X = P + w * (t + 0.5 * segmentLength);// only sample halfway to edge of atmosphere
+        float altitude = length(X) - earth.r_s; // optimize length(X) from above
+        opticalDepth_r += exp(-altitude / sun.scaleHeight_r) * segmentLength;
+        opticalDepth_m += exp(-altitude / sun.scaleHeight_m) * segmentLength;
+        t += segmentLength;
+    }
+
+    vec3 tau = sun.beta_r * (opticalDepth_r) + sun.beta_m * 1.05 * (opticalDepth_m);
+    return vec3(exp(-tau.x), exp(-tau.y), exp(-tau.z));
+}
+
+Radiance3 scatteredLight(vec3 P, vec3 w) {
+    float d = distanceToSpace(P, w);
+    if (d == inf) {
+        return vec3(0.0);
+    }
+
+    float mu = dot(w, sun.direction);
+    float mu2 = mu * mu;
+    float meanCosine2 = sun.meanCosine * sun.meanCosine;
+
+    // rayleigh
+    vec3 sum_r = vec3(0.0);
+    float opticalDepth_r = 0.0;
+    float phase_r = (3.0 / (16.0 * PI)) * (1.0 + mu2);
+    
+    // mie
+    vec3 sum_m = vec3(0.0);
+    float opticalDepth_m = 0.0;
+    float phase_m = ((3.0 / (8.0 * PI)) * ((1.0 - meanCosine2) * (1.0 + mu2))) / ((2.0 + meanCosine2) * pow(1.0 + meanCosine2 - 2.0 * sun.meanCosine * mu, 1.5));
+
+    float segmentLength = d / float(SKYLIGHT_VIEWDIR_SAMPLES);
+    float t = 0.0;
+    
+    for (int i = 0; i < SKYLIGHT_VIEWDIR_SAMPLES; ++i) {
+        vec3 X = P + w * (t + 0.5 * segmentLength);
+        float altitude = length(X) - earth.r_s;
+        float segmentDepth_r = exp(-altitude / sun.scaleHeight_r) * segmentLength;
+        opticalDepth_r += segmentDepth_r;
+        float segmentDepth_m = exp(-altitude / sun.scaleHeight_m) * segmentLength;
+        opticalDepth_m += segmentDepth_m;
+
+        // float sampleAltitude = PI_2 - asin(earth.r_s / length(X)) + acos(normalize(X).y) + 0;//sun.altitude;
+        // float visibility = sunVisibility(sampleAltitude);
+
+        if (distanceToSpace(X, sun.direction) != inf) {
+
+            // Secondary raymarch along ray L toward sun
+            float segmentLength_L = d / float(SKYLIGHT_SUNDIR_SAMPLES);
+            float t_L = 0.0;
+            float opticalDepth_Lr = 0.0;
+            float opticalDepth_Lm = 0.0;
+            
+            for (int j = 0; j < SKYLIGHT_SUNDIR_SAMPLES; ++j) {
+                vec3 Y = X + sun.direction * (t_L + 0.5 * segmentLength_L);// only sample halfway to edge of atmosphere
+                float altitude_L = length(Y) - earth.r_s; // optimize length(X) from above
+                opticalDepth_Lr += exp(-altitude_L / sun.scaleHeight_r) * segmentLength;
+                opticalDepth_Lm += exp(-altitude_L / sun.scaleHeight_m) * segmentLength;
+                t_L += segmentLength_L;
+            }
+
+            vec3 tau = sun.beta_r * (opticalDepth_Lr + opticalDepth_r) + sun.beta_m * 1.05 * (opticalDepth_Lm + opticalDepth_m);
+            vec3 attenuation = vec3(exp(-tau.x), exp(-tau.y), exp(-tau.z));
+            sum_r +=  segmentDepth_r * attenuation;
+            sum_m +=  segmentDepth_m * attenuation;
+            }
+        t += segmentLength;
+    }
+    vec3 result = vec3(0.0);
+    if (rayleighEnabled) {
+        result += sum_r * phase_r * sun.beta_r;
+    }
+    if (mieEnabled) {
+        result += sum_m * phase_m * sun.beta_m;
+    }
+    return sun.intensity * result;
+}
+
+float hash(float n) {
+    return fract(sin(n) * 43758.5453); // Black magic?
+}
+
+float noise(in Vector3 x) {
+    if (proceduralNoise) {
+        vec3 p = floor(x);
+        vec3 f = fract(x);
+        
+        // I have no idea what's going on here. Maybe that's okay?
+        f = f * f * (3.0 - 2.0 * f);
+        float n = p.x + (57.0 * p.y) + (113.0 * p.z);
+        return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+                       mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
+                   mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
+                       mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);       
+    }
+    else {
+        vec3 p = floor(x);
+        vec3 f = fract(x);
+        
+        f = f * f * (3.0 - 2.0 * f);
+        
+        vec2 uv = (p.xy + vec2(37.0, 17.0) * p.z) + f.xy;
+        vec2 rg = texture(iChannel0, (uv + 0.5) / 256.0, -100.0).yx;
+        return mix(rg.x, rg.y, f.z);
+    }
+}
+
+
+float map(Point3 X) {
+    float density = 0;
+    Point3 Y = X - vec3(frame * cloudSpeed, 0.0, 0.0);
+
+    density += 0.5000 * noise(Y); Y *= 2.01;
+    float enabled = float(complexNoise);
+    density += enabled * 0.2500 * noise(Y); Y *= 2.03;
+    density += enabled * 0.1250 * noise(Y); // Y *= 2.02;
+    // density += enabled * 0.0625 * noise(Y);
+
+    density *= cloudAmplitude;
+    density -= X.y; // Density fades with altitude
+    density = clamp(density, 0.0, 1.0);
+
+    return density;
+}
+
+Radiance4 cloudColor(Point3 P, Vector3 w, Radiance3 directColor, Radiance3 indirectColor) {
+    Radiance4 sum = Radiance4(0, 0, 0, 0);
+    
+    float t = 0.0;
+    for (int i = 0; i < 100; ++i) {
+        Point3 X = P + t * w;
+        float density = map(X);
+        float brightness = 1.0 - density;
+        vec4 color = vec4(0.0);
+
+        if (shadowsEnabled) {
+            // sample a point closer to the sun to determine how much X is in shadow
+            float difference = map(X + 0.3 * sun.direction);
+            color = vec4(mix(directColor, indirectColor, difference).rgb, density);
+        }
+        else {
+            color = vec4(brightness, brightness, brightness, density);
+        }        
+
+        color.a *= 0.3;
+        color.rgb *= color.a;
+        sum += color * (1.0 - sum.a);
+        t += max(0.1, 0.025 * t); // Sample less often at larger distances
+    }
+    
+    sum.rgb /= 0.001 + sum.a;
+        
+    return clamp(sum, 0.0, 1.0);
+}
+
+
+void main() {
+    // Primary ray origin    
+    Point3 P  = cameraToWorldMatrix[3];
+
+    // Primary ray direction
+    Vector3 w = Matrix3(cameraToWorldMatrix) * 
+        normalize(Vector3((gl_FragCoord.xy - g3d_FragCoordExtent / 2.0) * Vector2(1, -1),
+                          g3d_FragCoordExtent.y / ( -2.0 * tanHalfFieldOfViewY)));
+
+    float maxDist = inf;
+
+    //////////////////////////////////////
+    
+    // Start at surface of earth
+    Point3 R = P + vec3(0.0, earth.r_s, 0.0);
+
+    Radiance3 skyColor = scatteredLight(R, w);
+    // Direct light color for clouds
+    Radiance3 directLight = directLight(R, sun.direction);
+    // Approximate ambient light by getting scattered light from vertical
+    Radiance3 indirectLight = scatteredLight(R, normalize(R));
+    // The noise function breaks down at large values, sample noise from P instead
+    Radiance4 cloudColor = cloudColor(P, w, directLight, indirectLight);
+
+    Radiance3 result;
+    if (cloudsEnabled) {
+        result = mix(skyColor, cloudColor.rgb, cloudColor.a); // Linear interpolation by alpha channel
+    }
+    else {
+        result = skyColor;
+    }
+
+    // Dithering by hornet: https://www.shadertoy.com/view/MslGR8
+    float dither_bit = 8.0;
+    float grid_position = fract( dot( gl_FragCoord.xy - vec2(0.5,0.5) , vec2(1.0/16.0,10.0/36.0) + 0.25 ) );
+    float dither_shift = (0.25) * (1.0 / (pow(2.0,dither_bit) - 1.0));
+    vec3 dither_shift_RGB = vec3(dither_shift, -dither_shift, dither_shift); //subpixel dithering
+    dither_shift_RGB = mix(2.0 * dither_shift_RGB, -2.0 * dither_shift_RGB, grid_position);
+
+    pixelColor = result +  dither_shift_RGB; 
+
+    //////////////////////////////////////
+     
+    // Camera space z value
+    float csZ = maxDist / w.z;
+    
+    // Pack into standard OpenGL depth buffer format to make the result compatible
+    // with rasterization and post-processing.
+    gl_FragDepth = (maxDist == inf) ? 1.0 : ((projectionMatrix22 * csZ + projectionMatrix23) / -csZ);
+}

@@ -1,0 +1,281 @@
+/* -*- c++ -*- */
+{ 
+    entities = { 
+        base = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(0, -0.01, 0, 45 ); 
+            model = "baseModel"; 
+            visible = true; 
+        }; 
+        
+        camera = Camera { 
+            depthOfFieldSettings = DepthOfFieldSettings { 
+                enabled = true; 
+                farBlurRadiusFraction = 0.0171429; 
+                farBlurryPlaneZ = -31.7833; 
+                farSharpPlaneZ = -18; 
+                focusPlaneZ = -10; 
+                lensRadius = 0.01; 
+                model = "ARTIST"; 
+                nearBlurRadiusFraction = 0.0121978; 
+                nearBlurryPlaneZ = -3.07562; 
+                nearSharpPlaneZ = -5.49561; 
+            }; 
+            
+            filmSettings = FilmSettings { 
+                antialiasingEnabled = true; 
+                antialiasingFilterRadius = 0; 
+                bloomRadiusFraction = 0.009; 
+                bloomStrength = 0.05; 
+                debugZoom = 1; 
+                gamma = 2.2; 
+                sensitivity = 1.09823; 
+                toneCurve = Spline { 
+                    control = ( 0, 0.280851, 0.604255, 0.882979, 1 ); 
+                    extrapolationMode = "LINEAR"; 
+                    finalInterval = -1; 
+                    interpolationMode = "CUBIC"; 
+                    time = ( 0, 0.369565, 0.495652, 0.691304, 1 ); 
+                }; 
+                
+                vignetteBottomStrength = 0.05; 
+                vignetteSizeFraction = 0.17; 
+                vignetteTopStrength = 0.5; 
+            }; 
+            
+            frame = CFrame::fromXYZYPRDegrees(38.5549, 2.84925, -3.22677, 115.833, 9.72454 ); 
+            motionBlurSettings = MotionBlurSettings { 
+                cameraMotionInfluence = 0.5; 
+                enabled = true; 
+                exposureFraction = 0.75; 
+                maxBlurDiameterFraction = 0.1; 
+                numSamples = 15; 
+            }; 
+            
+            projection = Projection { 
+                farPlaneZ = -200; 
+                fovDegrees = 60; 
+                fovDirection = "VERTICAL"; 
+                nearPlaneZ = -0.1; 
+                pixelOffset = Vector2(0, 0 ); 
+            }; 
+            
+            visualizationScale = 1; 
+        }; 
+        
+        crate0 = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(31.5827, 1.06206, 4.05426, 63.1677 ); 
+            model = "crateModel"; 
+            visible = true; 
+        }; 
+        
+        crate1 = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(37.0249, 2.39623, -3.65219, -59.9654, 8.19645e-007, -0.540478 ); 
+            model = "crateModel"; 
+            visible = true; 
+        }; 
+        
+        crate2 = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(14.0842, 0.693939, 0.131171, -103.2 ); 
+            model = "crateModel"; 
+            visible = true; 
+        }; 
+        
+        fillLight = Light { 
+            attenuation = ( 0.0001, 0, 1 ); 
+            biradiance = Biradiance3(0.1, 0.2, 0.1 ); 
+            castsShadows = false; 
+            enabled = true; 
+            frame = CFrame::fromXYZYPRDegrees(1, 1, 1, -30, 45, 0 ); 
+            producesDirectIllumination = true; 
+            producesIndirectIllumination = true; 
+            spotHalfAngleDegrees = 180; 
+            type = "DIRECTIONAL"; 
+        }; 
+        
+        guard1 = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(10.15, 4.15, 16.7183, -80, 1.70313 ); 
+            model = "guardModel"; 
+            visible = true; 
+        }; 
+        
+        guard2 = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(18.7763, 13.6, 1.64244, -124.419, -5.17237 ); 
+            model = "guardModel"; 
+            visible = true; 
+        }; 
+        
+        ship0 = VisibleEntity { 
+            model = "shipModel"; 
+            track = PFrameSpline { 
+                control = ( 
+                    CFrame::fromXYZYPRDegrees(26.3327, 8.5, -0.0861456, 45.9565, 90 ), 
+                    CFrame::fromXYZYPRDegrees(26.3327, 8.5, -0.0861456, 45.9565, 90 ), 
+                    CFrame::fromXYZYPRDegrees(26.3327, 8.5, -0.0861456, 45.9565, 90 ), 
+                    CFrame::fromXYZYPRDegrees(26.3327, 8.5, -0.0861456, 45.9565, 90 ), 
+                    CFrame::fromXYZYPRDegrees(24.1358, 39.4339, -2.90633, 37.911, 49.171, -2.08937e-005 ), 
+                    CFrame::fromXYZYPRDegrees(8.93182, 53.0665, -22.3102, 78.3693, 20.7577, 16.8177 ), 
+                    CFrame::fromXYZYPRDegrees(-21.1608, 52.7642, -5.10814, 175.042, -22.8437, 27.1815 ), 
+                    CFrame::fromXYZYPRDegrees(-4.16206, 26.1231, 19.7621, -79.8919, -23.1988, -26.8858 ), 
+                    CFrame::fromXYZYPRDegrees(65.6007, 20.9046, -31.3437, -52.0152, -0.0743307, -0.956289 ), 
+                    CFrame::fromXYZYPRDegrees(19.9115, 16.0712, -60.6112, 74.3558, 0.980352, 0.613089 ) ); 
+                
+                extrapolationMode = "CLAMP"; 
+                finalInterval = -1; 
+                interpolationMode = "CUBIC"; 
+                time = ( 0, 5, 5.1, 5.2, 6, 6.5, 7, 7.5, 8, 9 ); 
+            }; 
+            
+            visible = true; 
+        }; 
+        
+        ship1 = VisibleEntity { 
+            frame = CFrame::fromXYZYPRDegrees(16.8586, 8.50494, 8.36059, 45.9323, 89.944 ); 
+            model = "shipModel"; 
+            visible = true; 
+        }; 
+        
+        skybox = Skybox { 
+            texture = Texture::Specification { 
+                filename = "cubemap/hipshot_m9_sky/16_*.png"; 
+                encoding = Texture::Encoding {
+                    readMultiplyFirst = 1.5;
+                }
+            }; 
+        }; 
+        
+        spawn = MarkerEntity { 
+            color = Color3(0, 1, 0 ); 
+            frame = CFrame::fromXYZYPRDegrees(0, 2, 0 ); 
+            osBoxArray = ( 
+                AABox(
+                    Vector3(-1, -1, -1 ), 
+                    Vector3(1, 1, 1 ) ) ); 
+            
+        }; 
+        
+        sun = Light { 
+            bulbPower = Power3(200000, 170000, 190000 ); 
+            castsShadows = true; 
+            enabled = true; 
+            farPlaneZLimit = -130; 
+            frame = CFrame::fromXYZYPRDegrees(52.2703, 90.3336, -28.0108, 115.046, -61.0367, -3.71807 ); 
+            nearPlaneZLimit = -30; 
+            producesDirectIllumination = true; 
+            producesIndirectIllumination = true; 
+            shadowMapBias = 0.02; 
+            shadowMapSize = Vector2int16(2048, 2048 ); 
+            spotHalfAngleDegrees = 27; 
+            spotSquare = true; 
+            type = "SPOT"; 
+        }; 
+        
+        trackingCamera = Camera { 
+            depthOfFieldSettings = DepthOfFieldSettings { 
+                enabled = false; 
+                farBlurRadiusFraction = 0.005; 
+                farBlurryPlaneZ = -100; 
+                farSharpPlaneZ = -40; 
+                focusPlaneZ = -10; 
+                lensRadius = 0.01; 
+                model = "NONE"; 
+                nearBlurRadiusFraction = 0.015; 
+                nearBlurryPlaneZ = -0.25; 
+                nearSharpPlaneZ = -1; 
+            }; 
+            
+            filmSettings = FilmSettings { 
+                antialiasingEnabled = true; 
+                antialiasingFilterRadius = 0; 
+                bloomRadiusFraction = 0.009; 
+                bloomStrength = 0.05; 
+                debugZoom = 1; 
+                gamma = 2.2; 
+                sensitivity = 1; 
+                toneCurve = Spline { 
+                    control = ( 0, 0.0787234, 0.359574, 0.723404, 1 ); 
+                    extrapolationMode = "LINEAR"; 
+                    finalInterval = -1; 
+                    interpolationMode = "CUBIC"; 
+                    time = ( 0, 0.178261, 0.26087, 0.665217, 1 ); 
+                }; 
+                
+                vignetteBottomStrength = 0.05; 
+                vignetteSizeFraction = 0.17; 
+                vignetteTopStrength = 0.5; 
+            }; 
+            
+            frame = CFrame::fromXYZYPRDegrees(24.0128, 11.6948, 6.05699, -44.3874, 9.75197 ); 
+            motionBlurSettings = MotionBlurSettings { 
+                cameraMotionInfluence = 0.5; 
+                enabled = true; 
+                exposureFraction = 0.75; 
+                maxBlurDiameterFraction = 0.1; 
+                numSamples = 15; 
+            }; 
+            
+            projection = Projection { 
+                farPlaneZ = -250; 
+                fovDegrees = 60; 
+                fovDirection = "VERTICAL"; 
+                nearPlaneZ = -0.5; 
+                pixelOffset = Vector2(0, 0 ); 
+            }; 
+            
+            track = lookAt(
+                CFrame::fromXYZYPRDegrees(24.0128, 11.6948, 6.05699, -44.3874, 9.75197 ), 
+                entity("ship0") ); 
+            
+            visualizationScale = 1; 
+        }; 
+        
+    }; 
+    
+    lightingEnvironment = LightingEnvironment { 
+        ambientOcclusionSettings = AmbientOcclusionSettings { 
+            bias = 0.012; 
+            blurRadius = 4; 
+            blurStepSize = 2; 
+            depthPeelSeparationHint = 0.001; 
+            edgeSharpness = 1; 
+            enabled = true; 
+            intensity = 1; 
+            monotonicallyDecreasingBilateralWeights = false; 
+            numSamples = 17; 
+            radius = 1; 
+            useDepthPeelBuffer = false; 
+            useNormalBuffer = false; 
+            useNormalsInBlur = false; 
+        }; 
+        
+        emissiveRadianceScale = 1; 
+        environmentMap = Texture::Specification { 
+            filename = "cubemap/hipshot_m9_sky/16_*.png"; 
+        };        
+        lightMapRadianceScale = 1; 
+        radianceScale = 1; 
+    }; 
+    
+    models = { 
+        baseModel = ArticulatedModel::Specification { 
+            filename = "model/discontent/discontent.pk3/maps/kamq3dm2.bsp"; 
+            scale = 0.8; 
+            stripLightMapCoords = true; 
+            stripLightMaps = true; 
+        }; 
+        
+        crateModel = ArticulatedModel::Specification { 
+            filename = "model/crate/crate.obj"; 
+        }; 
+        
+        guardModel = MD2Model::Specification { 
+            filename = "md2/pmarine/tris.MD2"; 
+            material = "md2/pmarine/Centurion.png"; 
+            weaponFilename = "md2/pmarine/weapon.MD2"; 
+            weaponMaterial = "md2/pmarine/weapon.PCX"; 
+        }; 
+        
+        shipModel = #include("model/viper/viper.ArticulatedModel.Any"); 
+    }; 
+    
+    name = "Beta Squadron"; 
+} 

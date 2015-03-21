@@ -1,0 +1,179 @@
+// -*- c++ -*-
+// Original "Clouds" shader by Inigo Quilez (iq): https://www.shadertoy.com/view/XslGRr#
+// Rewritten for G3D by Jonas Luebbers, 2014
+
+#version 330
+#include <g3dmath.glsl>
+#include <Texture/Texture.glsl>
+
+// Input arguments from the C++ program
+uniform mat4x3 cameraToWorldMatrix;
+
+uniform_Texture(samplerCube, environmentMap_);
+
+uniform float tanHalfFieldOfViewY;
+uniform float projectionMatrix22, projectionMatrix23;
+
+uniform sampler2D iChannel0;
+
+uniform float frame;
+uniform float cloudSpeed;
+uniform float cloudAmplitude;
+uniform bool shadowsEnabled;
+uniform bool complexNoise;
+uniform bool proceduralNoise;
+
+// Output to the App::m_framebuffer
+out Color3 pixelColor;
+
+//////////////////////////////////////////////////////////////
+
+const Vector3 sunDirection = vec3(-1.0, 0.1, 0.0);
+const Color3 outerColor = vec3(1.0, 0.95, 0.8);
+const Color3 innerColor = vec3(0.5, 0.5, 0.5);
+const Color3 shadowColor = vec3(1.0);
+
+float hash(float n) {
+    return fract(sin(n) * 43758.5453); // Black magic?
+}
+
+float noise(in vec3 x) {
+    if (proceduralNoise) {
+        vec3 p = floor(x);
+        vec3 f = fract(x);
+        
+        // I have no idea what's going on here. Maybe that's okay?
+        f = f * f * (3.0 - 2.0 * f);
+        float n = p.x + (57.0 * p.y) + (113.0 * p.z);
+        return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
+                       mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
+                   mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
+                       mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);       
+    }
+    else {
+        vec3 p = floor(x);
+        vec3 f = fract(x);
+        
+        f = f * f * (3.0 - 2.0 * f);
+        
+        vec2 uv = (p.xy + vec2(37.0, 17.0) * p.z) + f.xy;
+        vec2 rg = texture(iChannel0, (uv + 0.5) / 256.0, -100.0).yx;
+        return mix(rg.x, rg.y, f.z);
+    }
+}
+
+
+Vector4 map(Point3 X) {
+    float density = 0;
+    Point3 Y = X - vec3(frame * cloudSpeed, -10.0, 0.0);
+
+    density += 0.5000 * noise(Y); Y *= 2;
+    float enabled = float(complexNoise);
+    density += enabled * 0.2500 * noise(Y); Y *= 2;
+    density += enabled * 0.1250 * noise(Y); Y *= 2;
+    density += enabled * 0.0625 * noise(Y);
+
+    density *= cloudAmplitude;
+    density -= X.y; // Density fades with altitude
+    density = clamp(density, 0.0, 1.0);
+
+    Vector4 result = vec4(density);
+    result.rgb = mix(outerColor, innerColor, density);
+    return result;
+}
+
+/*
+Vector4 map(Point3 X) {
+    float density = -1.0 - (abs(X.y - 0.5) + 0.5) / 2.0;
+    vec3 Y = X * 0.5 - vec3(0.0, 0.0, 1.5) * frame * hpf;
+    
+    float f;
+    f  = 0.50000 * noise(Y); Y *= 2;
+    f += 0.25000 * noise(Y); Y *= 2;
+    f += 0.12500 * noise(Y); Y *= 2;
+    f += 0.06250 * noise(Y);
+
+    density = clamp(density + 4.0 * f, 0.0, 1.0);
+    
+    vec3 color = mix(outerColor, innerColor, density);
+    
+    return vec4(color, density);
+}
+*/
+
+float testShadow(Point3 X) {
+    float shadow = 1.0;
+    float t = 0.0;
+    for (int i = 0; i < 5; ++i) {
+        vec3 Y = X + t * sunDirection; // Raymarch toward sun
+        shadow = shadow - map(Y).a * shadow;
+
+        t += 0.2;
+    }
+    return shadow;
+}
+
+Radiance4 traceRay(Point3 P, Vector3 w) {
+    Radiance4 sum = Radiance4(0, 0, 0, 0);
+    
+    float t = 0.0;
+    for (int i = 0; i < 100; ++i) {
+        Point3 X = P + t * w;
+        Radiance4 color = map(X);
+        
+        // One shadow sample
+        if (shadowsEnabled) {
+            float difference = clamp((color.w - map(X + 0.3 * sunDirection).w) * 1.5, 0.0, 1.0);
+            vec3 shadow = shadowColor + innerColor * difference;
+            color.xyz *= shadow;
+        }
+
+        // Multiple shadow samples: slower, more accurate
+        /*
+        float shadow = testShadow(X);
+        color.rgb *= mix(shadowColor, vec3(1.0), shadow);
+        */
+
+        color.a *= 0.3; // Increase tranparency to taste
+        color.rgb *= color.a;
+        sum += color * (1.0 - sum.a);
+        t += 0.1;
+    }
+    
+    sum.rgb /= 0.001 + sum.a;
+        
+    return clamp(sum, 0.0, 1.0);
+}
+
+
+void main() {
+    // Primary ray origin    
+    Point3 P  = cameraToWorldMatrix[3];
+
+    // Primary ray direction
+    Vector3 w = Matrix3(cameraToWorldMatrix) * 
+        normalize(Vector3((gl_FragCoord.xy - g3d_FragCoordExtent / 2.0) * Vector2(1, -1),
+                          g3d_FragCoordExtent.y / ( -2.0 * tanHalfFieldOfViewY)));
+
+    float maxDist = inf;       
+
+    //////////////////////////////////////
+
+    Radiance4 rayColor = traceRay(P,w);
+
+    float sun = clamp(dot(sunDirection, w), 0.0, 1.0);
+    Radiance3 skyColor = vec3(0.6, 0.71, 0.75) - (w.y * 0.2 * vec3(1.0, 0.5, 1.0)) + (0.15 * 0.5);
+    Radiance3 sunColor = 0.2 * vec3(1.0, 0.6, 0.1) * pow(sun, 8.0);
+    Radiance3 result = mix(skyColor + sunColor, rayColor.xyz, rayColor.w); // Linear interpolation by alpha channel
+
+    pixelColor = result;
+
+    //////////////////////////////////////
+     
+    // Camera space z value
+    float csZ = maxDist / w.z;
+    
+    // Pack into standard OpenGL depth buffer format to make the result compatible
+    // with rasterization and post-processing.
+    gl_FragDepth = (maxDist == inf) ? 1.0 : ((projectionMatrix22 * csZ + projectionMatrix23) / -csZ);
+}

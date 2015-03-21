@@ -1,0 +1,45 @@
+#version 330 // -*- c++ -*-
+#include <g3dmath.glsl>
+
+// Input arguments from the C++ program
+uniform mat4x3         cameraToWorldMatrix;
+
+uniform samplerCube    environmentMap_buffer;
+uniform Color4         environmentMap_readMultiplyFirst;
+uniform float          environmentMap_MIPConstant;
+
+uniform float          tanHalfFieldOfViewY;
+uniform float          projectionMatrix22, projectionMatrix23;
+
+// Output to the App::m_framebuffer
+out Color3 L_o;
+
+void main() {
+    // Generate an eye ray in camera space
+    Ray eyeRay = Ray(Point3(0, 0, 0),
+                     normalize(Vector3((gl_FragCoord.xy - g3d_FragCoordExtent / 2.0) * Vector2(1, -1), 
+                                       g3d_FragCoordExtent.y / ( -2.0 * tanHalfFieldOfViewY))));
+
+    // Transform the ray to world space
+    eyeRay.direction = Matrix3(cameraToWorldMatrix) * eyeRay.direction;
+    eyeRay.origin    = cameraToWorldMatrix * vec4(eyeRay.origin, 1.0);
+
+    // Outgoing light
+    L_o = Radiance3(0);
+    float maxDist = inf;       
+
+    //////////////////////////////////////
+
+    // Render the scene here
+
+    L_o = texture(environmentMap_buffer, eyeRay.direction).rgb * environmentMap_readMultiplyFirst.rgb;
+
+    //////////////////////////////////////
+     
+    // Camera space z value
+    float csZ = maxDist / eyeRay.direction.z;
+    
+    // Pack into standard OpenGL depth buffer format to make the result compatible
+    // with rasterization and post-processing.
+    gl_FragDepth = (maxDist == inf) ? 1.0 : ((projectionMatrix22 * csZ + projectionMatrix23) / -csZ);
+}

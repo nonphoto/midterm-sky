@@ -1,0 +1,167 @@
+#version 330 // -*- c++ -*-
+#include <g3dmath.glsl>
+#include "Sphere.glsl"
+
+#define SCENE_CHOICE 0
+
+// Input arguments from the C++ program
+uniform mat4x3         cameraToWorldMatrix;
+
+uniform samplerCube    environmentMap_buffer;
+uniform Color4         environmentMap_readMultiplyFirst;
+uniform float          environmentMap_MIPConstant;
+
+uniform float          tanHalfFieldOfViewY;
+uniform float          projectionMatrix22, projectionMatrix23;
+
+// Output to the App::m_framebuffer
+out Color3 pixelColor;
+
+///////////////////////////////////////////////////////////////////////////////
+
+#if SCENE_CHOICE == 0 // Spheres
+    const Sphere surface0 = Sphere(Point3(0,0,0), 1.0, defaultMaterial);
+    const Sphere surface1 = Sphere(Point3(0,-200,0), 199.0, Material(Color3(0,0.4,0.5), 0.0, 1.0, 60));
+    const Sphere surface2 = Sphere(Point3(3,0,0), 1.0, defaultMaterial);
+    const Sphere surface3 = Sphere(Point3(-1,0,3), 1.0, Material(Color3(0.7, 0.6, 0.1), 0.0, 1.0, 100));
+    const Sphere surface4 = Sphere(Point3(-4,0,3), 1.0, Material(Color3(0.0, 0.9, 0.1), 1.0, 1.0, 1000));
+    const Sphere surface5 = Sphere(Point3(-8,0,3), 1.0, Material(Color3(0.0, 0.9, 0.1), 1.0, 1.0, 1000));
+
+    // Point light
+    const Point3 Y = Point3(50, 100, 50);
+    const Power3 Phi = Power3(1e6);
+
+#else // Cornell box
+
+    const Sphere surface0 = Sphere(Point3(0, 200,0), 198.0, Material(Color3(0.8), 0.0, 0.2, 60));
+    const Sphere surface1 = Sphere(Point3(0,-200,0), 198.0, Material(Color3(0.8), 0.0, 0.2, 60));
+    const Sphere surface2 = Sphere(Point3(0,0,-200), 198.0, Material(Color3(0.8), 0.0, 0.2, 60));
+    const Sphere surface3 = Sphere(Point3(-200,0,0), 198.0, Material(Color3(0.9, 0.0, 0.0), 0.0, 0.2, 60));
+    const Sphere surface4 = Sphere(Point3(200,0,0),  198.0, Material(Color3(0.0, 0.9, 0.0), 0.0, 0.2, 60));
+    const Sphere surface5 = Sphere(Point3(0.75,-1,-0.25), 1.0, Material(Color3(0.9, 0.9, 0.1), 0.0, 1.0, 1000));
+
+    // Point light
+    const Point3 Y = Point3(0, 1.8, 0);
+    const Power3 Phi = Power3(60);
+
+#endif
+
+
+Radiance3 L_o(Surfel surfel, Vector3 w_o);
+
+/** 
+    This represents the entire scene. We could build a data structure
+    and store it in a buffer or a texture, but for the moment we'll
+    just hard-code the whole thing.
+
+    distance is initially the maximum distance to trace. On return it
+    is the distance to the intersection.
+
+    returns true on a hit and false otherwise
+*/
+bool intersectScene(Point3 P, Vector3 w, inout float distance, out Surfel surfel) {
+    bool hit = false;
+
+#   for (int i = 0; i < 6; ++i) 
+        hit = intersect(surface$(i), P, w, distance, surfel) || hit;
+#   endfor
+
+    return hit;
+}
+
+
+/** Color of the background in this direction */
+Radiance3 background(Vector3 w_i) {
+    return texture(environmentMap_buffer, w_i).rgb * environmentMap_readMultiplyFirst.rgb;
+}
+
+/** Distance to bump the ray on a hit */
+const float rayBump = 1e-4;
+
+/** Returns the incident light at X from direction w_i.
+    distance is the distance to the point that created the light */
+Radiance3 L_i(Point3 X, Vector3 w_i, out float distance) {
+    distance = inf;
+    Surfel surfel;
+    
+    if (intersectScene(X + w_i * rayBump, w_i, distance, surfel)) {
+        // Shading
+        return L_o(surfel, -w_i);
+    } else {
+        return background(w_i);
+    }
+}
+
+
+/** Overload for ignoring distance */
+Radiance3 L_i(Point3 X, Vector3 w_i) {
+    float distance;
+    return L_i(X, w_i, distance);
+}
+
+
+Radiance3 L_o(Surfel surfel, Vector3 w_o) {
+    Color3 lambertianCoefficient = lerp(surfel.material.color, Color3(0), surfel.material.metal);
+    Color3 glossyCoefficient     = surfel.material.glossyCoefficient * lerp(Color3(0.05), surfel.material.color, surfel.material.metal);
+
+    Vector3 n = surfel.normal;
+    Point3  X = surfel.position;
+
+    // Environment lighting:
+    // Integrate over the hemisphere, so there is no factor of 1/pi
+    Radiance3 L = textureLod(environmentMap_buffer, n, 10).rgb * environmentMap_readMultiplyFirst.rgb * lambertianCoefficient;
+   
+    // Mirror reflection vector
+    Vector3 w_m = 2 * n * dot(w_o, n) - w_o;
+
+    // Glossy environment reflection
+    float mip = environmentMap_MIPConstant - 0.5 * log2(surfel.material.glossyExponent + 1.0);
+    L += textureLod(environmentMap_buffer, w_m, mip).rgb * environmentMap_readMultiplyFirst.rgb * glossyCoefficient;
+
+
+    // Point lighting
+    // Set up the shadow ray
+    float       lightDistance = length(Y - X);
+    Vector3     w_i = normalize(Y - X);
+    Biradiance3 B_i = Phi / (4 * pi * square(lightDistance));
+
+    Surfel ignoreSurfel;
+    if ((dot(w_i, n) > 0.0) &&
+        ! intersectScene(X + (w_i + n * 2.0) * rayBump, w_i, lightDistance, ignoreSurfel)) {
+
+        // Clamp glossiness to make nice highlights even on mirrors
+        float g = min(surfel.material.glossyExponent, 2000.0);
+
+        // Blinn's "half-vector"
+        Vector3 w_h = normalize(w_i + w_o);
+
+        // Blinn-Phong shading
+        L += max(0.0, dot(n, w_i)) * B_i * 
+                (lambertianCoefficient / pi + 
+                 pow(max(0.0, dot(n, w_h)), g) * glossyCoefficient * (g + 8.0) / 8.0);
+    }
+    
+    return L;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void main() {
+    // Generate an eye ray in camera space
+    Vector3 w_i = normalize(Vector3((gl_FragCoord.xy - g3d_FragCoordExtent / 2.0) * Vector2(1, -1), 
+                                    g3d_FragCoordExtent.y / ( -2.0 * tanHalfFieldOfViewY)));
+
+    // Transform the ray to world space
+    w_i       = Matrix3(cameraToWorldMatrix) * w_i;
+    Point3 X = cameraToWorldMatrix * Vector4(0.0, 0.0, 0.0, 1.0);
+
+    float distance = inf;
+    pixelColor = L_i(X, w_i, distance);
+
+    // Camera space z value of the first surface hit
+    float csZ = distance / -w_i.z;
+    
+    // Pack into standard OpenGL depth buffer format to make the result compatible
+    // with rasterization and post-processing.
+    gl_FragDepth = (distance == inf) ? 1.0 : ((projectionMatrix22 * csZ + projectionMatrix23) / -csZ);
+}
