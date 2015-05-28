@@ -5,9 +5,10 @@ I completed this project as a midterm assignment for Computational Graphics at W
 
 ## Results
 ![The final render][f0]
-[The final shader][shader]
-[A short film of the shader][film]
-[An unedited clip at the regular framrate][clip]
+
+- [The final shader][shader]
+- [A short film of the shader][film]
+- [An unedited clip at the regular framrate][clip]
 
 ## Goals
 Our goal was to create a shader that combines atmospheric scattering and clouds. We wanted it to render fast enough to interact with in real-time and be procedural, with no modeling or scene definition.
