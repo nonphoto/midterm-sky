@@ -68,7 +68,7 @@ We can't claim to take all of the credit. These references were critical in help
 [f5]: doc-files/shadows.png "Figure 5: Clouds with shadows"
 
 [film]: journal/sky-film.mp4 "Short film"
-[clip]: 2014-10-21_002_midterm-sky_r3409_g3d_r5430__Full_Day_cycle_with_better_clouds.mp4 "Journal clip"
+[clip]: journal/2014-10-21_002_midterm-sky_r3409_g3d_r5430__Full_Day_cycle_with_better_clouds.mp4 "Journal clip"
 [shader]: data-files/sky.pix "Final shader"
 [atmosphere-shader]: data-files/sunsets.pix "Atmosphere shader"
 [clouds-shader]: data-files/clouds.pix "Clouds shader"
