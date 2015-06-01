@@ -1,0 +1,38 @@
+<!DOCTYPE html>                                                                                                                                                                                             
+<html>                                                                                                                                                                                                      
+                                                                                                                                                                                                            
+  <head>                                                                                                                                                                                                    
+    <meta charset="UTF-8">                                                                                                                                                                                  
+    <title>Jonas Kent Luebbers</title>                                                                                                                                                                      
+    <!-- <link rel="stylesheet" href="https://wurflen.github.io/style.css" type="text/css"> -->                                                                                                             
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/base-min.css">                                                                                                                         
+  </head>                                                                                                                                                                                                   
+                                                                                                                                                                                                            
+  <body>                                                                                                                                                                                                    
+    <div id="readme">                                                                                                                                                                                       
+      Fetching the description for this project...                                                                                                                                                          
+    </div>                                                                                                                                                                                                  
+    <br>                                                                                                                                                                                                    
+    <a href="https://github.com/wurflen/misc">View on Github</a>                                                                                                                                            
+  </body>                                                                                                                                                                                                   
+                                                                                                                                                                                                            
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript">                                                                                                    
+  </script>                                                                                                                                                                                                 
+  <script src="https://rawgit.com/chjj/marked/master/marked.min.js">                                                                                                                                        
+  </script>                                                                                                                                                                                                 
+  <script type="text/javascript">                                                                                                                                                                           
+    $(function() {                                                                                                                                                                                          
+    $.ajax({                                                                                                                                                                                                
+    url: "README.md",                                                                                                                                                                                       
+    dataType: 'text',                                                                                                                                                                                       
+    success: function(data) {                                                                                                                                                                               
+    console.log(marked(data))                                                                                                                                                                               
+    $("#readme").html(marked(data));                                                                                                                                                                        
+    },                                                                                                                                                                                                      
+    error: function(xhr, status, error) {                                                                                                                                                                   
+    $("#readme").html("There was a problem fetching the project description. Try looking for it on Github instead!");                                                                                       
+    }                                                                                                                                                                                                       
+    });                                                                                                                                                                                                     
+    });                                                                                                                                                                                                     
+  </script>                                                                                                                                                                                                 
+</html> 
