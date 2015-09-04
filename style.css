@@ -1,9 +1,14 @@
 body {
     font-family: helvetica, sans-serif;
+    font-size: 18px;
     margin: auto;
-    width: 100%;
+    width: 80%;
     max-width: 700px;
 }
+
+@media screen and (max-width:1000px) {
+}
+
 
 img {
     width: 100%;
