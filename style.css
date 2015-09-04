@@ -9,12 +9,6 @@ body {
 @media screen and (max-width:1000px) {
 }
 
-@media
-(-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
-    font-size: 40;
-}
-
 img {
     width: 100%;
 }
