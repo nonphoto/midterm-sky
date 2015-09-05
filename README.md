@@ -1,9 +1,5 @@
-# Sky
-Sky is a GLSL shader that simulates atmospheric scattering and its effect on clouds.
-
-I completed this project as a midterm assignment for Computational Graphics at Williams College with Benji Jones as a teammate. I plan on porting this to [Shadertoy](www.shadertoy.com) soon.
-
-We The final GLSL shader we wrote consists of two parts. The first part draws the sky background by simulating the scattering of light particles in the atmosphere. Clouds are drawn in front of the sky by approximating how light scatters in a density field. We used the [G3D Engine](http://g3d.sourceforge.net) at the request of our Professor, Morgan McGuire.
+# Atmospheric Scattering
+Sky is a GLSL shader that simulates atmospheric scattering and its effect on clouds. I completed this project as a midterm assignment and accompanying research on atmospheric scattering for Computational Graphics at Williams College with Benji Jones as a teammate. The final shader we wrote consists of two parts. The first part draws the sky background by simulating the scattering of light particles in the atmosphere. Clouds are drawn in front of the sky by approximating how light scatters in a density field. We used the [G3D Engine](http://g3d.sourceforge.net) at the request of our Professor, Morgan McGuire.
 
 Some results:
 
@@ -15,8 +11,7 @@ Some results:
 
 
 ### Rendering Technique
-
-This project lends itself well to a rendering technique called [raycasting](www.wikipedia.com). Real life objects get their color from light bouncing off of them and into your eye or a camera. Raycasting is a method of determining the color of each pixel on the screen by approximating how light bounces off of things in a scene. Unlike in real life, the rays go from the camera outward and only follow a subset of the many possible paths light can take. 
+Real life objects get their color from light bouncing off of them and into your eye or a camera. Raycasting, the technique used in this project, is a method of determines the color of each pixel on the screen by approximating how light bounces off of things in a scene. Unlike in real life, the titular rays go from the camera outward and only follow a subset of the many possible paths light can take. 
 
 You might see why raycasting works well here. The sky gets its color from sunlight bouncing off of the particles that make up our atmosphere in an effect called atmospheric scattering. This means we can simulate each ray of light from the sun to the camera with a raycast in the opposite direction.
 
@@ -32,7 +27,6 @@ For the purpose of rendering a clear sky, there are really only two ways that li
 The above images show the results of a shader that simulates Mie scattering, then Rayleigh scattering, then the two combined.
 
 ### Clouds
-
 Unlike particles in the atmosphere, water particles in clouds are quite large but vary a lot in density. We used a 3 dimensional [noise function](www.wikipedia.com) to generate the density randomly. Like before, a raycasting algorithm determines the color of each visible point in the scene, but this time we need to take shadows into account. Clouds actually cast shadows on themselves, so calculate how much any given point inside the cloud is in shadow, the algorithm performs a secondary raycast straight toward the sun to determine how far within the cloud it is, and reduces the light that reaches that point accordingly.
 
 Finally, the color of the clouds isn't just the color of the light coming from the sun, but the result of all of the scattered light in the atmosphere. For the sake of speed, the algorithm interpolates between an ambient light color and direct light color calculated from the atmospheric scattering results rather than perform another raycast for each part of the cloud. 

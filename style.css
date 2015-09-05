@@ -1,12 +1,15 @@
 body {
-    font-family: helvetica, sans-serif;
+    font-family: "omnes-pro";
     font-size: 18px;
     margin: auto;
     width: 80%;
     max-width: 700px;
 }
 
-@media screen and (max-width:1000px) {
+@media (min-width: 50em) {
+    body {
+	font-size: 0.5em;
+    }
 }
 
 img {
