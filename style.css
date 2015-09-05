@@ -1,20 +1,113 @@
-body {
-    font-family: "aktiv-grotesk", sans-serif;
-    font-size: 18px;
-    margin: auto;
-    width: 80%;
-    max-width: 700px;
+/* body { */
+/*     font-family: "aktiv-grotesk", sans-serif; */
+/*     font-size: 18px; */
+/*     margin: auto; */
+/*     width: 80%; */
+/*     max-width: 700px; */
+/* } */
+
+/* @media (min-width: 50em) { */
+/*     body { */
+/* 	font-size: 0.5em; */
+/*     } */
+/* } */
+
+/* img { */
+/*     width: 100%; */
+/* } */
+
+/* h1, h2, h3, h4, p, li { */
+/* } */
+
+html {
+    background: #ffffff;
 }
 
-@media (min-width: 50em) {
+body {
+    font: 100%/1.5 sans-serif;
+    padding: 0 2em;
+}
+
+@media (max-width: 22em) {
     body {
-	font-size: 0.5em;
+	font-size: .9em;
+	padding: 0 1.5em;
     }
 }
 
-img {
-    width: 100%;
+h1, h2 {
+    font-weight: normal;
+    margin: 1em 0;
+}
+h1 {
+    font-size: 2em;
+}
+h2 {
+    font-size: 1.5em;
+}
+p, ol {
+    margin: 1em 0;
+    padding: 0;
+}
+p, li {
+    text-align: justify;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    -o-hyphens: auto;
+    hyphens: auto;
+}
+h2 + p {
+    margin: 1em 0 1em 0;
 }
 
-h1, h2, h3, h4, p, li {
+article {
+    max-width: 30em;
+    margin: 0 auto;
+}
+
+@media (min-width: 34em) {
+    body {
+	max-width: 51em;
+	margin: 0 auto;
+    }
+    article {
+	width: 66.66666%;
+	margin: 0 0 0 33.333333%;
+    }
+    h1,
+    h1 + p {
+	margin: 1em 0 1em 0;
+    }
+    h1 {
+	font-size: 2.5em;
+    }
+    h1 + p {
+	font-size: 1.5em;
+    }
+    h2 {
+	font-size: 1.75em;
+    }
+}
+
+@media (min-width: 51em) {
+    body {
+	max-width: 68em;
+    }
+    article {
+	width: 50%;
+	margin: 0 25%;
+	position: relative;
+    }
+    .sidenote {
+	position: absolute;
+	right: -50%;
+	width: 45%;
+	width: -webkit-calc(50% - 2em);
+	width: -moz-calc(50% - 2em);
+	width: -ms-calc(50% - 2em);
+	width: -o-calc(50% - 2em);
+	width: calc(50% - 2em);
+	font-size: .9em;
+    }
 }
